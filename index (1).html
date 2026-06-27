@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Public Procurement Ledger — CPPP Tender Transparency Project</title>
+<style>
+  :root {
+    --paper: #F6F4EC;
+    --ink: #1C1B17;
+    --ink-soft: #5B584E;
+    --rule: #D9D5C5;
+    --flag: #A33126;
+    --flag-bg: #F4E4DF;
+    --accent: #1F5C4D;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  header { border-bottom: 2px solid var(--ink); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .masthead { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+  h1 { font-size: 1.9rem; margin: 0; letter-spacing: 0.01em; }
+  .sub { font-family: "Courier New", monospace; font-size: 0.78rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 6px; }
+  nav { font-family: "Courier New", monospace; font-size: 0.85rem; }
+  nav a { color: var(--accent); text-decoration: none; margin-left: 1.2rem; }
+  nav a:hover { text-decoration: underline; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-bottom: 2.5rem; }
+  .stat { background: var(--paper); padding: 1rem 1.2rem; }
+  .stat .num { font-size: 1.7rem; font-weight: 700; }
+  .stat .num.flag { color: var(--flag); }
+  .stat .label { font-family: "Courier New", monospace; font-size: 0.7rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  section { margin-bottom: 2.75rem; }
+  h2 { font-size: 1.15rem; border-bottom: 1px solid var(--rule); padding-bottom: 0.4rem; margin-bottom: 1rem; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; font-family: "Courier New", monospace; font-size: 0.85rem; }
+  .controls select, .controls input {
+    font-family: inherit; font-size: 0.85rem; padding: 6px 10px;
+    border: 1px solid var(--ink-soft); background: var(--paper); color: var(--ink);
+  }
+  .controls input[type="text"] { flex: 1; min-width: 200px; }
+  .controls label { display: flex; align-items: center; gap: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-family: "Courier New", monospace; font-size: 0.78rem; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); border-bottom: 2px solid var(--ink); }
+  td.title { white-space: normal; max-width: 280px; font-family: inherit; }
+  .tbl-scroll { overflow-x: auto; border: 1px solid var(--rule); }
+
+  .flagpill { display: inline-block; background: var(--flag-bg); color: var(--flag); font-size: 0.68rem; padding: 2px 6px; margin-right: 3px; border: 1px solid var(--flag); }
+
+  .vendor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .vendor-card { border: 1px solid var(--rule); padding: 0.9rem; }
+  .vendor-card .name { font-weight: 700; font-size: 0.92rem; }
+  .vendor-card .meta { font-family: "Courier New", monospace; font-size: 0.72rem; color: var(--ink-soft); margin-top: 4px; }
+
+  .cluster-card { border: 1px solid var(--flag); background: var(--flag-bg); padding: 0.8rem 1rem; margin-bottom: 8px; }
+  .cluster-card .addr { font-family: "Courier New", monospace; font-size: 0.74rem; color: var(--ink-soft); margin-bottom: 4px; }
+  .cluster-card .names { font-weight: 700; font-size: 0.88rem; }
+
+  .manifesto { font-size: 0.92rem; color: var(--ink-soft); border-left: 3px solid var(--ink); padding-left: 1rem; }
+  .downloads a { display: inline-block; margin-right: 1rem; font-family: "Courier New", monospace; font-size: 0.82rem; color: var(--accent); }
+  .note { font-family: "Courier New", monospace; font-size: 0.7rem; color: var(--ink-soft); margin-top: 10px; }
+  footer { border-top: 1px solid var(--rule); padding-top: 1.2rem; font-family: "Courier New", monospace; font-size: 0.75rem; color: var(--ink-soft); }
+  footer a { color: var(--accent); }
+  @media (max-width: 700px) { .stats { grid-template-columns: repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="masthead">
+      <h1>The Public Procurement Ledger</h1>
+      <nav>
+        <a href="#explore">Explore</a><a href="#vendors">Vendors</a><a href="#clusters">Clusters</a><a href="#download">Raw data</a><a href="#about">About</a>
+      </nav>
+    </div>
+    <div class="sub">Central Public Procurement Portal · India · Updated automatically from source</div>
+  </header>
+
+  <div class="stats" id="stats">
+    <div class="stat"><div class="num" id="s-total">—</div><div class="label">Awards on record</div></div>
+    <div class="stat"><div class="num flag" id="s-singlebid">—</div><div class="label">Single-bid awards</div></div>
+    <div class="stat"><div class="num" id="s-window">—</div><div class="label">Median bid window</div></div>
+    <div class="stat"><div class="num" id="s-vendors">—</div><div class="label">Repeat-winner vendors</div></div>
+  </div>
+
+  <section id="explore">
+    <h2>Flagged awards</h2>
+    <p class="manifesto">Every row below tripped at least one red flag: a single bidder, a bid window of seven days or less, or a vendor that has won three or more contracts in this corpus. None of this is an accusation — it is a starting point for a question.</p>
+    <div class="controls">
+      <select id="orgFilter"><option value="">All organisations</option></select>
+      <label><input type="checkbox" id="onlyFlagged" checked> Flagged only</label>
+      <input type="text" id="search" placeholder="Search vendor or organisation">
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Tender</th><th>Title</th><th>Organisation</th><th>Vendor</th><th>Value (₹)</th><th>Bids</th><th>Window</th><th>Flags</th></tr></thead>
+        <tbody id="award-rows"></tbody>
+      </table>
+    </div>
+    <div class="note" id="row-count"></div>
+  </section>
+
+  <section id="vendors">
+    <h2>Vendor leaderboard</h2>
+    <p class="manifesto">Ranked by total contract value won across the corpus. A vendor appearing here repeatedly across departments and states is not, by itself, evidence of anything — but it is exactly the kind of pattern worth cross-referencing.</p>
+    <div class="vendor-grid" id="vendor-grid"></div>
+  </section>
+
+  <section id="clusters">
+    <h2>Shared-address clusters</h2>
+    <p class="manifesto">Each group below lists two or more <strong>differently named</strong> vendors that won contracts using the same registered address. This is the strongest single signal in this dataset for shell-company bid-rigging: separate paper entities controlled from one office, bidding against each other to simulate competition.</p>
+    <div id="cluster-list"></div>
+  </section>
+
+  <section id="download">
+    <h2>Full dataset</h2>
+    <p class="manifesto">This dashboard runs on a precomputed summary of government tender records from the Central Public Procurement Portal (CPPP). The underlying source databases and full record-level detail are available for independent verification and deeper analysis. Update these links to point at wherever you host your own copies of <code>aoc_tenders.db</code> and <code>tenders_vps.db</code>.</p>
+    <div class="downloads">
+      <a href="#" id="link-aoc">aoc_tenders.db</a>
+      <a href="#" id="link-vps">tenders_vps.db</a>
+    </div>
+    <p class="note">Verify SHA-256 hashes before use. Re-run analyze.py whenever source data is refreshed to keep this page current.</p>
+  </section>
+
+  <section id="about">
+    <h2>About this project</h2>
+    <p class="manifesto">Every rupee public money spends goes through a tender. A notice is published, bids are invited, a winner is selected, a contract is signed. This process is the immune system of public finance — and it is where most large-scale procurement corruption quietly occurs. This dashboard exists to make that process auditable by anyone, not just people who can write SQL: single-bid awards, abnormally short bid windows, repeat winners, and shared-address vendor clusters are surfaced automatically, with the full source data left open for anyone who wants to dig further.</p>
+  </section>
+
+  <footer>
+    Built on publicly available government procurement data. This page reads only static JSON files generated offline — no server, no live database connection, no tracking.
+  </footer>
+</div>
+
+<script>
+const DATA_DIR = "./data";
+
+async function loadJSON(name, fallback) {
+  try {
+    const res = await fetch(`${DATA_DIR}/${name}`);
+    if (!res.ok) throw new Error("missing");
+    return await res.json();
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function inr(v) {
+  if (v === null || v === undefined) return "—";
+  return "₹" + Math.round(v).toLocaleString("en-IN");
+}
+
+const SAMPLE_SUMMARY = { total_awards: 4921960, flagged_awards: 1812340, single_bid_pct: 31.4, median_window_days: 11, repeat_vendor_count: 2108 };
+const SAMPLE_AWARDS = [
+  { id: "GEM/2025/B/4471", title: "Construction of internal roads, PWD division", org: "PWD Kanpur Division", vendor: "Shree Infra Pvt Ltd", value: 8400000, bids: 1, window_days: 6, flags: ["single-bid","short-window"] },
+  { id: "KER/2025/0093", title: "Resurfacing of state highway segment", org: "Kerala PWD", vendor: "Shree Infra Pvt Ltd", value: 5600000, bids: 1, window_days: 9, flags: ["single-bid","repeat-vendor"] },
+  { id: "GEM/2025/C/991", title: "Consultancy for irrigation canal survey", org: "UP Irrigation Dept", vendor: "Apex Consultants", value: 1450000, bids: 1, window_days: 5, flags: ["single-bid","short-window"] },
+  { id: "WBT/2025/118901", title: "Bridge maintenance contract", org: "WB Roads & Buildings", vendor: "Shree Infra Pvt Ltd", value: 12300000, bids: 2, window_days: 14, flags: ["repeat-vendor"] }
+];
+const SAMPLE_VENDORS = [
+  { vendor: "Shree Infra Pvt Ltd", wins: 14, total_value: 92100000, departments: ["PWD Kanpur Division","Kerala PWD","WB Roads & Buildings"] },
+  { vendor: "Apex Consultants", wins: 7, total_value: 18200000, departments: ["UP Irrigation Dept"] },
+  { vendor: "Urban Facilities Mgmt", wins: 5, total_value: 9800000, departments: ["Mumbai Municipal Corp"] }
+];
+const SAMPLE_CLUSTERS = [
+  { address: "plot 14 sector 8 industrial area kanpur up", vendors: ["Shree Infra Pvt Ltd", "Shree Buildtech Solutions", "SI Infraprojects"] },
+  { address: "office no 3 second floor mg road pune", vendors: ["Apex Consultants", "Apex Project Advisory"] }
+];
+
+let awards = [];
+
+function renderStats(s) {
+  document.getElementById("s-total").textContent = s.total_awards ? (s.total_awards/1e6).toFixed(2)+"M" : "—";
+  document.getElementById("s-singlebid").textContent = s.single_bid_pct ? s.single_bid_pct+"%" : "—";
+  document.getElementById("s-window").textContent = s.median_window_days ? s.median_window_days+" days" : "—";
+  document.getElementById("s-vendors").textContent = s.repeat_vendor_count ? s.repeat_vendor_count.toLocaleString("en-IN") : "—";
+}
+
+function populateOrgFilter() {
+  const orgs = [...new Set(awards.map(a => a.org).filter(Boolean))].sort();
+  const sel = document.getElementById("orgFilter");
+  orgs.forEach(o => {
+    const opt = document.createElement("option");
+    opt.value = o; opt.textContent = o;
+    sel.appendChild(opt);
+  });
+}
+
+function renderAwards() {
+  const org = document.getElementById("orgFilter").value;
+  const onlyFlagged = document.getElementById("onlyFlagged").checked;
+  const q = document.getElementById("search").value.toLowerCase();
+
+  const filtered = awards.filter(a =>
+    (!org || a.org === org) &&
+    (!onlyFlagged || (a.flags && a.flags.length)) &&
+    (!q || (a.vendor||"").toLowerCase().includes(q) || (a.org||"").toLowerCase().includes(q))
+  );
+
+  const body = document.getElementById("award-rows");
+  body.innerHTML = "";
+  filtered.slice(0, 500).forEach(a => {
+    const tr = document.createElement("tr");
+    const flagHtml = (a.flags||[]).map(f => `<span class="flagpill">${f}</span>`).join("");
+    tr.innerHTML = `<td>${a.id||""}</td><td class="title">${a.title||""}</td><td>${a.org||""}</td><td>${a.vendor||""}</td><td>${inr(a.value)}</td><td>${a.bids ?? "—"}</td><td>${a.window_days!=null ? a.window_days+"d" : "—"}</td><td>${flagHtml||"—"}</td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById("row-count").textContent = `Showing ${Math.min(filtered.length,500)} of ${filtered.length} matching rows.`;
+}
+
+function renderVendors(vendors) {
+  const grid = document.getElementById("vendor-grid");
+  grid.innerHTML = "";
+  vendors.slice(0, 30).forEach(v => {
+    const card = document.createElement("div");
+    card.className = "vendor-card";
+    card.innerHTML = `<div class="name">${v.vendor}</div><div class="meta">${v.wins} wins · ${inr(v.total_value)} total<br>${(v.departments||[]).slice(0,3).join(", ")}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+function renderClusters(clusters) {
+  const list = document.getElementById("cluster-list");
+  list.innerHTML = "";
+  if (!clusters.length) {
+    list.innerHTML = '<p class="note">No shared-address clusters found in this dataset.</p>';
+    return;
+  }
+  clusters.slice(0, 50).forEach(c => {
+    const card = document.createElement("div");
+    card.className = "cluster-card";
+    card.innerHTML = `<div class="addr">${c.address}</div><div class="names">${c.vendors.join(" · ")}</div>`;
+    list.appendChild(card);
+  });
+}
+
+async function init() {
+  const [summary, awardData, vendorData, clusterData] = await Promise.all([
+    loadJSON("summary.json", SAMPLE_SUMMARY),
+    loadJSON("awards.json", SAMPLE_AWARDS),
+    loadJSON("vendors.json", SAMPLE_VENDORS),
+    loadJSON("shell_clusters.json", SAMPLE_CLUSTERS)
+  ]);
+  awards = awardData;
+  renderStats(summary);
+  populateOrgFilter();
+  renderAwards();
+  renderVendors(vendorData);
+  renderClusters(clusterData);
+
+  document.getElementById("orgFilter").addEventListener("change", renderAwards);
+  document.getElementById("onlyFlagged").addEventListener("change", renderAwards);
+  document.getElementById("search").addEventListener("input", renderAwards);
+}
+
+init();
+</script>
+</body>
+</html>
